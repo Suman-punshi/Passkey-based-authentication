@@ -75,7 +75,7 @@ import base64
 from Crypto_utils import decrypt_with_pr, generate_keyPair
 from encrypted_private_key import read_from_locked_zip, lock_modified_json
 
-SERVER_URL = "http://localhost:5000"  # Your Flask backend
+SERVER_URL = "http://localhost:5000"
 KEY_FILE = "locked_private_key.zip"
 
 class PasskeyApp:
@@ -92,16 +92,23 @@ class PasskeyApp:
         self.cms_id_entry = tk.Entry(root)
         self.cms_id_entry.grid(row=1, column=1, padx=10, pady=5)
 
-        # Buttons
-        tk.Button(root, text="Register", command=self.register).grid(row=2, column=0, columnspan=2, pady=10)
+        # Platform selection dropdown
+        tk.Label(root, text="Platform:").grid(row=2, column=0, padx=10, pady=5)
+        self.platform_var = tk.StringVar(root)
+        self.platform_var.set("Qalam")  # Default selection
+        platform_menu = tk.OptionMenu(root, self.platform_var, "Qalam", "LMS")
+        platform_menu.grid(row=2, column=1, padx=10, pady=5)
+
+        # Register button
+        tk.Button(root, text="Register", command=self.register).grid(row=3, column=0, columnspan=2, pady=10)
 
     def register(self):
         full_name = self.full_name_entry.get()
         cms_id = self.cms_id_entry.get()
-        print("9")
+        platform = self.platform_var.get()
 
         try:
-            # Step 1: Get challenge from Flask backend
+            # Step 1: Get challenge from backend
             response = requests.post(
                 f"{SERVER_URL}/register",
                 json={"full_name": full_name, "cms_id": cms_id}
@@ -110,7 +117,6 @@ class PasskeyApp:
                 messagebox.showerror("Error", response.json().get("message", "Registration failed"))
                 return
 
-            print("10")
             # Step 2: Decrypt challenge locally
             challenge_b64 = response.json()["challenge"]
             cipher = base64.b64decode(challenge_b64)
@@ -118,7 +124,6 @@ class PasskeyApp:
             private_key = base64.b64decode(content["private_key_nust"])
             shared_secret = decrypt_with_pr(private_key, cipher)
 
-            print("11")
             # Step 3: Verify with backend
             secret_b64 = base64.b64encode(shared_secret).decode()
             verify_response = requests.post(
@@ -133,17 +138,22 @@ class PasskeyApp:
             new_public, new_private = generate_keyPair()
             new_pub_b64 = base64.b64encode(new_public).decode()
 
-            print("12")
             finalize_response = requests.post(
                 f"{SERVER_URL}/finalize",
-                json={"cms_id": cms_id, "full_name": full_name, "new_public_key": new_pub_b64}
+                json={
+                    "cms_id": cms_id,
+                    "full_name": full_name,
+                    "new_public_key": new_pub_b64,
+                    "platform": platform
+                }
             )
-            if finalize_response.status_code == 200:
+
+            if finalize_response.status_code == 200 or finalize_response.json().get("status") == "already_registered":
                 # Save new private key
                 content["private_key_appA"] = base64.b64encode(new_private).decode()
                 lock_modified_json(KEY_FILE, content)
-                print("13")
-                messagebox.showinfo("Success", "🎉 Registration complete!")
+
+                messagebox.showinfo("Success", finalize_response.json().get("message", "Registration complete!"))
             else:
                 messagebox.showerror("Error", finalize_response.json().get("message", "Finalization failed"))
 

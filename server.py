@@ -81,21 +81,41 @@ def verify_identity():
 @app.route("/finalize", methods=["POST"])
 def finalize_registration():
     data = request.get_json()
-    if not data or "cms_id" not in data or "full_name" not in data or "new_public_key" not in data:
+    if not data or "cms_id" not in data or "full_name" not in data or "new_public_key" not in data or "platform" not in data:
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
     print("step 6")
     try:
+        # Check if user already exists
+        existing_user = registered_collection.find_one({"cms_id": data["cms_id"]})
+
+        if existing_user:
+            # If user exists, update their platform list if needed
+            current_platforms = existing_user.get("platforms", [])
+            if data["platform"] not in current_platforms:
+                registered_collection.update_one(
+                    {"cms_id": data["cms_id"]},
+                    {"$addToSet": {"platforms": data["platform"]}}
+                )
+            return jsonify({
+                "status": "already_registered",
+                "message": f"User already registered. Platform '{data['platform']}' added if not present."
+            })
+
+        # If new user, insert all details
         registered_collection.insert_one({
             "full_name": data["full_name"],
             "cms_id": data["cms_id"],
-            "public_key": data["new_public_key"]
+            "public_key": data["new_public_key"],
+            "platforms": [data["platform"]]
         })
+
         return jsonify({"status": "success", "message": "Registration complete."})
 
     except Exception as e:
         print("8")
         return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
