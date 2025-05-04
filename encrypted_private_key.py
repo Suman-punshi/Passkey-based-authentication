@@ -92,9 +92,9 @@ def lock_modified_json(zip_file_path, json_content, target_file="private_key.jso
 
 
 # Example usage
-json_file_path = "suman_kumari_private_key.json"
+json_file_path = "arham_haroon_private_key.json"
 zip_file_path = "locked_private_key.zip"
 target_file = "private_key.json"
-password = "404291"  # This would be your PIN
+password = "405943"  # This would be your PIN
 
 lock_json_with_password(json_file_path, zip_file_path, password)

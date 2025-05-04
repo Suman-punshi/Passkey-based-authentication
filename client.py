@@ -101,6 +101,51 @@ class PasskeyApp:
 
         # Register button
         tk.Button(root, text="Register", command=self.register).grid(row=3, column=0, columnspan=2, pady=10)
+    def login(self, platform):
+     cms_id = self.cms_id_entry.get()
+     if not cms_id:
+        messagebox.showerror("Error", "Please enter CMS ID")
+        return
+
+     try:
+        # Step 1: Get login challenge
+        response = requests.post(
+            f"{SERVER_URL}/login",
+            json={"cms_id": cms_id, "platform": platform}
+        )
+        if response.status_code != 200:
+            messagebox.showerror("Error", response.json().get("message", "Login failed"))
+            return
+
+        challenge_b64 = response.json()["challenge"]
+        cipher = base64.b64decode(challenge_b64)
+
+        # Step 2: Decrypt with existing private key
+        content = read_from_locked_zip(KEY_FILE)
+
+        # Try to find private key for either app
+        private_key_encoded = content.get("private_key_appA") or content.get("private_key")
+        if not private_key_encoded:
+            messagebox.showerror("Error", "No valid private key found. Please register first.")
+            return
+
+        private_key = base64.b64decode(private_key_encoded)
+        shared_secret = decrypt_with_pr(private_key, cipher)
+
+        # Step 3: Verify with backend
+        secret_b64 = base64.b64encode(shared_secret).decode()
+        verify_response = requests.post(
+            f"{SERVER_URL}/verify-login",
+            json={"cms_id": cms_id, "decrypted_message": secret_b64, "platform": platform}
+        )
+
+        if verify_response.status_code == 200:
+            messagebox.showinfo("Success", verify_response.json().get("message", "Login successful!"))
+        else:
+            messagebox.showerror("Error", verify_response.json().get("message", "Login verification failed"))
+
+     except Exception as e:
+        messagebox.showerror("Error", f"An error occurred during login: {str(e)}")
 
     def register(self):
         full_name = self.full_name_entry.get()
@@ -116,14 +161,19 @@ class PasskeyApp:
             if response.status_code != 200:
                 messagebox.showerror("Error", response.json().get("message", "Registration failed"))
                 return
-
+            print("10")
             # Step 2: Decrypt challenge locally
             challenge_b64 = response.json()["challenge"]
+            print("a")
             cipher = base64.b64decode(challenge_b64)
+            print("b")
             content = read_from_locked_zip(KEY_FILE)
-            private_key = base64.b64decode(content["private_key_nust"])
+            print("c")
+            private_key = base64.b64decode(content["private_key"])
+            print("d")
             shared_secret = decrypt_with_pr(private_key, cipher)
 
+            print("11")
             # Step 3: Verify with backend
             secret_b64 = base64.b64encode(shared_secret).decode()
             verify_response = requests.post(
@@ -138,6 +188,7 @@ class PasskeyApp:
             new_public, new_private = generate_keyPair()
             new_pub_b64 = base64.b64encode(new_public).decode()
 
+            print("12")
             finalize_response = requests.post(
                 f"{SERVER_URL}/finalize",
                 json={
@@ -152,6 +203,7 @@ class PasskeyApp:
                 # Save new private key
                 content["private_key_appA"] = base64.b64encode(new_private).decode()
                 lock_modified_json(KEY_FILE, content)
+                print("13")
 
                 messagebox.showinfo("Success", finalize_response.json().get("message", "Registration complete!"))
             else:
@@ -159,6 +211,7 @@ class PasskeyApp:
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
+
 
 if __name__ == "__main__":
     root = tk.Tk()
