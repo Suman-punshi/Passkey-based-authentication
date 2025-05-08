@@ -162,11 +162,11 @@ class PasskeyApp:
         # Title Label
         title_font = ('Helvetica', 24, 'bold')
         primary_color = '#4CAF50'
-        title_label = tk.Label(self.center_frame, text="Passkey Authentication", font=title_font, bg='#f0f0f0', fg=primary_color)
+        title_label = tk.Label(self.center_frame, text="Passkey Authentication", font=title_font, bg=self.bg_color, fg=primary_color)
         title_label.pack(pady=(50, 30))
 
         # Buttons Frame
-        buttons_frame = tk.Frame(self.center_frame, bg='#f0f0f0')
+        buttons_frame = tk.Frame(self.center_frame, bg=self.bg_color)
         buttons_frame.pack(pady=20)
 
         # Register Button
@@ -322,7 +322,7 @@ class PasskeyApp:
 
     # Friendly Welcome Message
      welcome_msg = "Welcome to your personalized faculty dashboard!\nHere you can access everything you need to manage your courses, students, and research."
-     tk.Label(self.center_frame, text=welcome_msg, font=welcome_font, bg=bg_color, fg='#555555', justify='center').pack(pady=(10, 30))
+     tk.Label(self.center_frame, text=welcome_msg, font=welcome_font, bg=bg_color, fg="#f5f6fa", justify='center').pack(pady=(10, 30))
 
     # Button Frame (Back + Logout)
      button_frame = tk.Frame(self.center_frame, bg=bg_color)
@@ -395,7 +395,7 @@ class PasskeyApp:
         "and stay updated with your academic journey.\n\n"
         "Wishing you a productive and successful semester ahead!"
     )
-     tk.Label(message_frame, text=message, font=('Lato', 14), bg=bg_color, fg=text_color, justify='left', anchor='w', wraplength=500).pack()
+     tk.Label(message_frame, text=message, font=('Lato', 14), bg=bg_color, fg="#f5f6fa", justify='left', anchor='w', wraplength=500).pack()
 
     # Buttons
      btn_frame = tk.Frame(self.center_frame, bg=bg_color)
