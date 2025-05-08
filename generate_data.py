@@ -6,12 +6,8 @@ from Crypto_utils import generate_keyPair
 
 # Define NUST members and CMS IDs
 members_info = [
-    ("Suman Kumari", "404291", "student"),
-    ("Arham Haroon", "405943", "student"),
-    ("Fatima Zahra", "404293", "student"),
-    ("Dr. Farhan Ali", "504101", "faculty"),
-    ("Prof. Ayesha Malik", "504102", "faculty"),
-    ("Dr. Naveed Ahmed", "504103", "faculty")
+    
+    ("Dr. Madiha Khalid", "123456", "faculty")
 ]
 
 def generate_nust_members():
@@ -35,7 +31,7 @@ def generate_nust_members():
         db_entries.append(member_record)
 
         # Store only Suman Kumari's private key locally
-        if full_name.lower() == "arham haroon":
+        if full_name.lower() == "dr. madiha khalid":
             suman_private_key = {
                 "cms_id": cms_id,
                 "private_key": priv_b64
@@ -55,7 +51,7 @@ print(f"Inserted {len(members)} NUST members (public keys only) into database.")
 
 # Save only Suman's private key to a local file
 if suman_key:
-    json_filename = "arham_haroon_private_key.json"
+    json_filename = "dr_madiha_khalid_private_key.json"
     with open(json_filename, "w") as f:
         json.dump(suman_key, f, indent=4)
     print(f"[+] Saved *your* private key locally to: {json_filename}")

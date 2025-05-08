@@ -11,70 +11,150 @@ from datetime import datetime, timezone, timedelta
 SERVER_URL = "http://localhost:5000"
 KEY_FILE = "locked_private_key.zip"
 
+import tkinter as tk
+import random
+
+class AnimatedBackground:
+    def __init__(self, canvas, colors):
+        self.canvas = canvas
+        self.colors = colors
+        self.shapes = []
+        self.max_shapes = 35
+        self.emojis = {'lock': "🔒", 'shield': "🛡️", 'key': "🔑"}
+        self.canvas.after(200, self.setup)  # Slight delay to ensure canvas is ready
+
+    def setup(self):
+        # Ensure canvas dimensions are available
+        width = self.canvas.winfo_width()
+        height = self.canvas.winfo_height()
+
+        if width <= 1 or height <= 1:
+            self.canvas.after(100, self.setup)  # Retry after a short delay
+            return
+
+        self.create_shapes(width, height)
+        self.animate()
+
+    def create_shapes(self, width, height):
+        for _ in range(self.max_shapes):
+            emoji = random.choice(list(self.emojis.values()))
+            x = random.randint(0, width)
+            y = random.randint(0, height)
+            size = random.randint(20, 40)
+            color = random.choice(self.colors)
+            dx = random.uniform(-0.7, 0.7)
+            dy = random.uniform(-0.7, 0.7)
+
+            # Avoid zero speed
+            if dx == 0: dx = 0.5
+            if dy == 0: dy = 0.5
+
+            text_id = self.canvas.create_text(x, y, text=emoji, font=("Arial", size), fill=color)
+            self.shapes.append((text_id, dx, dy))
+
+    def animate(self):
+        width = self.canvas.winfo_width()
+        height = self.canvas.winfo_height()
+
+        for i, (text_id, dx, dy) in enumerate(self.shapes):
+            self.canvas.move(text_id, dx, dy)
+            coords = self.canvas.bbox(text_id)
+
+            if coords:
+                x1, y1, x2, y2 = coords
+                # Bounce off the walls
+                if x1 <= 0 or x2 >= width:
+                    dx = -dx
+                if y1 <= 0 or y2 >= height:
+                    dy = -dy
+                self.shapes[i] = (text_id, dx, dy)
+
+        self.canvas.after(30, self.animate)
+
+
+import tkinter as tk
+
 class PasskeyApp:
     def __init__(self, root):
         self.current_user = None
         self.auth_token = None
         self.root = root
         root.title("Welcome to Central identity provider: IdP")
-        
+        root.configure(bg='#1e1e2f')
 
-        # Configure window to full screen
+        # Fullscreen and responsive setup
         root.attributes('-fullscreen', True)
-        root.configure(bg='#f0f0f0')  # Light gray background
-        # Local Fonts (check if these are available on your system)
-        self.title_font = ('Noto Serif', 26, 'bold')
-        self.header_font = ('Open Sans', 18, 'semibold')
-        self.body_font = ('Lato', 14)
-        self.accent_color_faculty = '#e07a5f'  # Burnt orange for Faculty
-        self.accent_color_student = '#81b29a'  # Sage green for Student
-        self.text_color = '#3d405b'  # Dark grayish blue
-        self.card_bg = '#f9f5e7'    # Off-white card background
-        # Custom fonts and colors
+        root.bind("<Configure>", self.on_resize)  # Bind resize event
+
+        # Fonts and Colors
         title_font = ('Helvetica', 24, 'bold')
-        label_font = ('Arial', 14)
-        entry_font = ('Arial', 12)
         button_font = ('Helvetica', 16, 'bold')
-        primary_color = '#4CAF50'  # Green
-        secondary_color = '#e0f2f7' # Light blue/teal
-        text_color = '#333333'      # Dark gray
+        primary_color = '#4CAF50'
 
-        # Main container frame to center content
-        self.center_frame = tk.Frame(root, bg='#f0f0f0')
-        self.center_frame.pack(expand=True)
+        self.bg_color = "#1e1e2f"
+        self.text_color = "#f5f6fa"
+        self.accent_color = "#6c5ce7"
+        self.student_color = "#00cec9"
+        self.faculty_color = "#ffeaa7"
 
-        # Title Label
-        title_label = tk.Label(self.center_frame, text="Passkey Authentication", font=title_font, bg='#f0f0f0', fg=primary_color)
+        # Canvas
+        self.canvas = tk.Canvas(root, bg=self.bg_color, highlightthickness=0)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        # Content Frame on Canvas
+        self.center_frame = tk.Frame(self.canvas, bg=self.bg_color)
+        self.canvas_window = self.canvas.create_window(
+            0, 0, window=self.center_frame, anchor="center"
+        )
+
+        # Animated Background Stub (you should define AnimatedBackground elsewhere)
+        self.anim_bg = AnimatedBackground(self.canvas, [self.accent_color, self.student_color, self.faculty_color])
+
+        # Title
+        title_label = tk.Label(self.center_frame, text="Passkey Authentication", font=title_font,
+                               bg='#f0f0f0', fg=primary_color)
         title_label.pack(pady=(50, 30))
 
-        # Buttons Frame
+        # Buttons
         buttons_frame = tk.Frame(self.center_frame, bg='#f0f0f0')
         buttons_frame.pack(pady=20)
 
-        # Register Button
-        register_button = tk.Button(buttons_frame, text="Register", command=self.show_register_page, font=button_font, bg=primary_color, fg='white', padx=20, pady=10, relief='raised', borderwidth=3)
-        register_button.pack(side=tk.LEFT, padx=10)
+        tk.Button(buttons_frame, text="Register", command=self.show_register_page, font=button_font,
+                  bg=primary_color, fg='white', padx=20, pady=10).pack(side=tk.LEFT, padx=10)
 
-        # Sign In Button
-        signin_button = tk.Button(buttons_frame, text="Sign In", command=self.show_signin_page, font=button_font, bg='#007bff', fg='white', padx=20, pady=10, relief='raised', borderwidth=3)
-        signin_button.pack(side=tk.LEFT, padx=10)
+        tk.Button(buttons_frame, text="Sign In", command=self.show_signin_page, font=button_font,
+                  bg='#007bff', fg='white', padx=20, pady=10).pack(side=tk.LEFT, padx=10)
 
-        # Exit Button (for development/testing in full screen)
-        exit_button = tk.Button(root, text="Exit Fullscreen", command=self.exit_fullscreen, font=('Arial', 10), bg='#cccccc', fg=text_color, padx=10, pady=5)
-        exit_button.pack(side=tk.BOTTOM, pady=10)
+        # Exit Fullscreen Button
+        tk.Button(self.root, text="Exit Fullscreen", command=self.exit_fullscreen,
+                  font=("Arial", 10), bg="#444", fg="white").place(relx=0.01, rely=0.95)
 
+        # Restore session or show initial
         res, data = self.restore_session()
         if res and data:
             if data["role"] == "Faculty":
-                self.show_faculty_page(data["full_name"], data["cms_id"])
+                self.show_faculty_page(data["full_name"], data["cms_id"], data["role"])
             else:
                 self.show_student_page(data["full_name"], data["cms_id"])
         else:
             self.show_initial_page()
 
+    def on_resize(self, event):
+        """Handles dynamic centering and resizing on root or canvas changes."""
+        width = self.canvas.winfo_width()
+        height = self.canvas.winfo_height()
+        self.canvas.coords(self.canvas_window, width // 2, height // 2)
+
     def clear_center_frame(self):
         for widget in self.center_frame.winfo_children():
             widget.destroy()
+    def exit_fullscreen(self):
+     self.root.attributes('-fullscreen', False)
+     self.root.geometry("1024x600")  # Optional: set a default size
+     self.root.update_idletasks()    # Force UI update
+     self.on_resize(None)            # Manually trigger resize logic
+
+    
 
     def show_initial_page(self):
         self.clear_center_frame()
@@ -107,7 +187,7 @@ class PasskeyApp:
         text_color = '#333333'
         button_font = ('Helvetica', 16, 'bold')
 
-        title_label = tk.Label(self.center_frame, text="Register", font=title_font, bg='#f0f0f0', fg=primary_color)
+        title_label = tk.Label(self.center_frame, text="Register", font=title_font, bg=self.bg_color, fg=primary_color)
         title_label.pack(pady=(50, 30))
 
         # Full Name Input
@@ -155,7 +235,7 @@ class PasskeyApp:
         text_color = '#333333'
         button_font = ('Helvetica', 16, 'bold')
 
-        title_label = tk.Label(self.center_frame, text="Sign In", font=title_font, bg='#f0f0f0', fg=primary_color)
+        title_label = tk.Label(self.center_frame, text="Sign In", font=title_font, bg=self.bg_color, fg=primary_color)
         title_label.pack(pady=(50, 30))
 
         # Name Input
@@ -208,7 +288,7 @@ class PasskeyApp:
         role = self.signin_role_var.get()
 
         if role == "Faculty":
-            self.show_faculty_page(name, cms_id)
+            self.show_faculty_page(name, cms_id,role)
         elif role == "Student":
             self.show_student_page(name, cms_id)
         else:
@@ -221,13 +301,14 @@ class PasskeyApp:
      title_font = ('Helvetica', 26, 'bold')
      label_font = ('Open Sans', 16)
      info_font = ('Open Sans', 18, 'bold')
-     card_bg = '#f9f5e7'
-     text_color = '#333333'
+     card_bg = '#2c2c3e'
+     text_color = '#f5f6fa'
      primary_color = '#FFC107'  # Amber for faculty
      welcome_font = ('Lato', 14, 'italic')
+     bg_color = self.bg_color 
 
     # Title
-     title_label = tk.Label(self.center_frame, text="Faculty Dashboard", font=title_font, bg='#f4f1de', fg=primary_color)
+     title_label = tk.Label(self.center_frame, text="Faculty Dashboard", font=title_font, bg=self.bg_color, fg=primary_color)
      title_label.pack(pady=(40, 10))
 
     # Info Card Frame
@@ -241,10 +322,10 @@ class PasskeyApp:
 
     # Friendly Welcome Message
      welcome_msg = "Welcome to your personalized faculty dashboard!\nHere you can access everything you need to manage your courses, students, and research."
-     tk.Label(self.center_frame, text=welcome_msg, font=welcome_font, bg='#f4f1de', fg='#555555', justify='center').pack(pady=(10, 30))
+     tk.Label(self.center_frame, text=welcome_msg, font=welcome_font, bg=bg_color, fg='#555555', justify='center').pack(pady=(10, 30))
 
     # Button Frame (Back + Logout)
-     button_frame = tk.Frame(self.center_frame, bg='#f4f1de')
+     button_frame = tk.Frame(self.center_frame, bg=bg_color)
      button_frame.pack(pady=20)
 
      back_button = tk.Button(
@@ -281,17 +362,18 @@ class PasskeyApp:
     
      title_font = ('Helvetica', 26, 'bold')
      label_font = ('Arial', 16)
-     text_color = '#333333'
+     text_color = '#f5f6fa'
      primary_color = '#28A745'  # Green for Student
-     card_bg = '#f0f7f4'
+     card_bg = '#2c2c3e'
      border_color = '#cce5cc'
+     bg_color = self.bg_color 
 
     # Title
      title_label = tk.Label(
     self.center_frame,
         text="🎓 Welcome to Your Student Dashboard",
         font=title_font,
-        bg='#e8f5e9',
+        bg=self.bg_color,
         fg=primary_color
     )
      title_label.pack(pady=(50, 20))
@@ -313,10 +395,10 @@ class PasskeyApp:
         "and stay updated with your academic journey.\n\n"
         "Wishing you a productive and successful semester ahead!"
     )
-     tk.Label(message_frame, text=message, font=('Lato', 14), bg='#ffffff', fg=text_color, justify='left', anchor='w', wraplength=500).pack()
+     tk.Label(message_frame, text=message, font=('Lato', 14), bg=bg_color, fg=text_color, justify='left', anchor='w', wraplength=500).pack()
 
     # Buttons
-     btn_frame = tk.Frame(self.center_frame, bg='#f4f1de')
+     btn_frame = tk.Frame(self.center_frame, bg=bg_color)
      btn_frame.pack(pady=30)
 
      back_button = tk.Button(
@@ -344,8 +426,7 @@ class PasskeyApp:
      logout_button.grid(row=0, column=1, padx=10)
 
     
-    def exit_fullscreen(self):
-        self.root.attributes('-fullscreen', False)
+    
 
     def register_user(self):
         full_name = self.register_full_name_entry.get()
@@ -421,7 +502,7 @@ class PasskeyApp:
                 data = response.json()
                 if data["role"] == "Faculty":
                     print("yaar kahan ja kay maron")
-                    self.show_faculty_page(data["full_name"], data["cms_id"])
+                    self.show_faculty_page(data["full_name"], data["cms_id"],data["role"])
                 else:
                     print("yahan kyu nyi arha bhai")
                     self.show_student_page(data["full_name"], data["cms_id"])
@@ -514,7 +595,7 @@ class PasskeyApp:
             # Step 4: Successful login - show appropriate dashboard
             messagebox.showinfo("Success", "Login successful!")
             if role == "Faculty":
-                self.show_faculty_page(name, cms_id)
+                self.show_faculty_page(name, cms_id,role)
             else:
                 self.show_student_page(name, cms_id)
 
