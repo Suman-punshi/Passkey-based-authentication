@@ -152,36 +152,36 @@ class ServiceProviderApp:
             tk.Label(self.center_frame, text=welcome_msg, font=welcome_font, bg='#f4f1de', fg='#555555', justify='center').pack(pady=(10, 30))
 
             # Button Frame (Back + Logout)
-            button_frame = tk.Frame(self.center_frame, bg='#f4f1de')
-            button_frame.pack(pady=20)
+            # button_frame = tk.Frame(self.center_frame, bg='#f4f1de')
+            # button_frame.pack(pady=20)
 
-            back_button = tk.Button(
-                button_frame,
-                text="← Back to Sign In",
-                command=self.show_signin_page,
-                font=('Lato', 12, 'bold'),
-                bg='#d62839',
-                fg='white',
-                padx=20,
-                pady=10,
-                relief='raised',
-                bd=2
-            )
-            back_button.grid(row=0, column=0, padx=10)
+            # back_button = tk.Button(
+            #     button_frame,
+            #     text="← Back to Sign In",
+            #     command=self.show_signin_page,
+            #     font=('Lato', 12, 'bold'),
+            #     bg='#d62839',
+            #     fg='white',
+            #     padx=20,
+            #     pady=10,
+            #     relief='raised',
+            #     bd=2
+            # )
+            # back_button.grid(row=0, column=0, padx=10)
 
-            logout_button = tk.Button(
-                button_frame,
-                text="Logout",
-                command=self.logout,
-                font=('Lato', 12, 'bold'),
-                bg='#ff4444',
-                fg='white',
-                padx=20,
-                pady=10,
-                relief='raised',
-                bd=2
-            )
-            logout_button.grid(row=0, column=1, padx=10)
+            # logout_button = tk.Button(
+            #     button_frame,
+            #     text="Logout",
+            #     command=self.logout,
+            #     font=('Lato', 12, 'bold'),
+            #     bg='#ff4444',
+            #     fg='white',
+            #     padx=20,
+            #     pady=10,
+            #     relief='raised',
+            #     bd=2
+            # )
+            # logout_button.grid(row=0, column=1, padx=10)
 
         else:
             title_font = ('Helvetica', 26, 'bold')
@@ -221,36 +221,36 @@ class ServiceProviderApp:
             tk.Label(message_frame, text=message, font=('Lato', 14), bg='#ffffff', fg=text_color, justify='left', anchor='w', wraplength=500).pack()
 
             # Buttons
-            btn_frame = tk.Frame(self.center_frame, bg='#f4f1de')
-            btn_frame.pack(pady=30)
+            # btn_frame = tk.Frame(self.center_frame, bg='#f4f1de')
+            # btn_frame.pack(pady=30)
 
-            back_button = tk.Button(
-                btn_frame,
-                text="Back",
-                command=self.show_signin_page,
-                font=('Lato', 12, 'bold'),
-                bg='#d62839',
-                fg='white',
-                padx=20,
-                pady=10
-            )
-            back_button.grid(row=0, column=0, padx=10)
+            # back_button = tk.Button(
+            #     btn_frame,
+            #     text="Back",
+            #     command=self.show_signin_page,
+            #     font=('Lato', 12, 'bold'),
+            #     bg='#d62839',
+            #     fg='white',
+            #     padx=20,
+            #     pady=10
+            # )
+            # back_button.grid(row=0, column=0, padx=10)
 
-            logout_button = tk.Button(
-                btn_frame,
-                text="Logout",
-                command=self.logout,
-                font=('Lato', 12, 'bold'),
-                bg='#ff4444',
-                fg='white',
-                padx=20,
-                pady=10
-            )
-            logout_button.grid(row=0, column=1, padx=10)
+            # logout_button = tk.Button(
+            #     btn_frame,
+            #     text="Logout",
+            #     command=self.logout,
+            #     font=('Lato', 12, 'bold'),
+            #     bg='#ff4444',
+            #     fg='white',
+            #     padx=20,
+            #     pady=10
+            # )
+            # logout_button.grid(row=0, column=1, padx=10)
 
-        # back_btn = tk.Button(self.center_frame, text="← Back to Login", command=self.show_main_screen,
-        #                      font=("Arial", 12), bg="#d62839", fg="white", padx=15, pady=8)
-        # back_btn.pack(pady=20)
+        back_btn = tk.Button(self.center_frame, text="← Back to Login", command=self.show_main_screen,
+                             font=("Arial", 12), bg="#d62839", fg="white", padx=15, pady=8)
+        back_btn.pack(pady=20)
 
     def exit_fullscreen(self):
         self.root.attributes('-fullscreen', False)
