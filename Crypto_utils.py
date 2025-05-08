@@ -37,5 +37,5 @@ def sign(key, message):
 
 
 def unsign(key, message, signature):
+    dss = MLDSA_87()
     return dss.verify(key, message, signature)
-    

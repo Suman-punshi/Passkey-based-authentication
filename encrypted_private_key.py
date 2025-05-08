@@ -1,6 +1,5 @@
 import pyzipper
 import json
-import getpass
 import tkinter as tk
 from tkinter import simpledialog
 
@@ -48,17 +47,6 @@ def read_from_locked_zip(zip_file_path, target_file="private_key.json"):
 
 
 
-
-
-# def lock_modified_json(zip_file_path, json_content, target_file="private_key.json"):
-#     pin = getpass.getpass("Enter your pin: ")
-#     with pyzipper.AESZipFile(zip_file_path, 'w', compression=pyzipper.ZIP_DEFLATED, encryption=pyzipper.WZ_AES) as zipf:
-#         zipf.setpassword(pin.encode())
-#         with zipf.open(target_file, 'w') as file:
-#             # Encode JSON string to bytes before writing
-#             file.write(json.dumps(json_content).encode('utf-8'))  # Fix here
-
-
 def lock_modified_json(zip_file_path, json_content, target_file="private_key.json"):
     # Create a hidden root window (required for Tkinter dialogs)
     root = tk.Tk()
@@ -74,20 +62,27 @@ def lock_modified_json(zip_file_path, json_content, target_file="private_key.jso
     if not pin:  # User clicked Cancel or closed the dialog
         raise ValueError("PIN entry cancelled")
 
+    # Debug: Show what you're saving
+    print("🔐 Saving updated JSON content:")
+    print(f"➡ Writing to file '{target_file}' inside ZIP: {zip_file_path}")
+
     # Proceed with ZIP encryption
     with pyzipper.AESZipFile(
-        zip_file_path, 
-        'w', 
-        compression=pyzipper.ZIP_DEFLATED, 
+        zip_file_path,
+        'w',
+        compression=pyzipper.ZIP_DEFLATED,
         encryption=pyzipper.WZ_AES
     ) as zipf:
         zipf.setpassword(pin.encode())
         with zipf.open(target_file, 'w') as file:
             file.write(json.dumps(json_content).encode('utf-8'))
 
+    # Debug: Confirm file contents in ZIP
+    with pyzipper.AESZipFile(zip_file_path, 'r') as zipf:
+        zipf.setpassword(pin.encode())
+        print("ZIP now contains:", zipf.namelist())
+
     root.destroy()
-
-
 
 
 
@@ -96,5 +91,3 @@ json_file_path = "arham_haroon_private_key.json"
 zip_file_path = "locked_private_key.zip"
 target_file = "private_key.json"
 password = "405943"  # This would be your PIN
-
-lock_json_with_password(json_file_path, zip_file_path, password)
