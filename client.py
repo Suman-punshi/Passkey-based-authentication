@@ -135,7 +135,7 @@ class PasskeyApp:
             if data["role"] == "Faculty":
                 self.show_faculty_page(data["full_name"], data["cms_id"], data["role"])
             else:
-                self.show_student_page(data["full_name"], data["cms_id"])
+                self.show_student_page(data["full_name"], data["cms_id"],data["role"])
         else:
             self.show_initial_page()
 
@@ -290,7 +290,7 @@ class PasskeyApp:
         if role == "Faculty":
             self.show_faculty_page(name, cms_id,role)
         elif role == "Student":
-            self.show_student_page(name, cms_id)
+            self.show_student_page(name, cms_id,role)
         else:
             messagebox.showerror("Error", "Invalid role selected.")
     
@@ -357,7 +357,7 @@ class PasskeyApp:
      logout_button.grid(row=0, column=1, padx=10)
 
 
-    def show_student_page(self, name, cms_id):
+    def show_student_page(self, name, cms_id,role):
      self.clear_center_frame()
     
      title_font = ('Helvetica', 26, 'bold')
@@ -384,6 +384,7 @@ class PasskeyApp:
 
      tk.Label(info_frame, text=f"👤 Name: {name}", font=label_font, bg=card_bg, fg=text_color, anchor='w').pack(fill='x', pady=5)
      tk.Label(info_frame, text=f"🆔 CMS ID: {cms_id}", font=label_font, bg=card_bg, fg=text_color, anchor='w').pack(fill='x', pady=5)
+     tk.Label(info_frame, text=f"🎓 Role: {role.title()}", font=label_font, bg=card_bg, fg=text_color, anchor='w').pack(fill='x', pady=5)
 
     # Message Frame
      message_frame = tk.Frame(self.center_frame, bg='#ffffff', padx=30, pady=25, bd=2, relief='ridge')
@@ -505,7 +506,7 @@ class PasskeyApp:
                     self.show_faculty_page(data["full_name"], data["cms_id"],data["role"])
                 else:
                     print("yahan kyu nyi arha bhai")
-                    self.show_student_page(data["full_name"], data["cms_id"])
+                    self.show_student_page(data["full_name"], data["cms_id"],data["role"])
 
                 return True, data
             else:
@@ -597,7 +598,7 @@ class PasskeyApp:
             if role == "Faculty":
                 self.show_faculty_page(name, cms_id,role)
             else:
-                self.show_student_page(name, cms_id)
+                self.show_student_page(name, cms_id,role)
 
         except Exception as e:
             messagebox.showerror("Error", f"Login failed: {str(e)}")

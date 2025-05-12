@@ -30,6 +30,7 @@ def login():
     try:
         decoded_token = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         idp_user = IdP_collection.find_one({'cms_id': decoded_token["cms_id"], 'full_name': decoded_token["name"], 'role': decoded_token["role"]})
+        print("Decoded token role:", decoded_token['role'])
         if not idp_user:
             return jsonify({'error': 'User not found in IdP'}), 404
         if token != idp_user["Jwt_token"]:
@@ -42,7 +43,7 @@ def login():
         # Check if the user exists in service provider DB
         service_user = App_collection.find_one({'cms_id': idp_user['cms_id']})
         if service_user:
-            return jsonify({'message': 'User logged in', 'name': service_user['name'], 'cms_id': service_user['cms_id']}), 200
+            return jsonify({'message': 'User logged in', 'name': service_user['name'],'role': service_user['role'],'cms_id': service_user['cms_id']}), 200
         else:
             # Register user if not found
             new_user = {
@@ -50,6 +51,7 @@ def login():
                 'cms_id': idp_user['cms_id'],
                 'role': idp_user['role']  # Default role is 'Student'
             }
+            print("roleeeeeee", idp_user['role'])
             App_collection.insert_one(new_user)
             return jsonify({'message': 'User registered and logged in', 'name': idp_user['full_name'], 'cms_id': idp_user['cms_id'], 'role' : idp_user['role']}), 201
     
